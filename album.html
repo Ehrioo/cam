@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album</title>
+    <style>
+        body { font-family: 'Fredoka One', cursive; background-color: #f8f8f8; text-align: center; padding: 20px; }
+        h1 { color: #ff5e92; }
+        .album-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .photo-strip { width: 160px; border: 10px solid #FFC0CB; border-radius: 12px; box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); cursor: pointer; transition: transform 0.2s; }
+        .photo-strip:hover { transform: scale(1.05); }
+        button { padding: 10px 20px; border: none; border-radius: 20px; background-color: #ff8fab; color: white; cursor: pointer; margin-top: 20px; }
+        button:hover { background-color: #ff5e92; }
+
+        /* Popup Styling */
+        .popup { 
+            display: none; 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); 
+            max-width: 80%; 
+            max-height: 80vh; 
+            overflow: hidden; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Image Styling */
+        .popup img { 
+            max-width: 80%; 
+            max-height: 70vh; 
+            object-fit: contain; 
+            margin-right: 20px; 
+        }
+
+        /* Button Container Styling */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+            padding-left: 20px;
+        }
+
+        .popup button {
+            padding: 12px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Album</h1>
+    <p>Click on a photo to choose an action.</p>
+    <div class="album-container" id="album"></div>
+    <button onclick="window.location.href='cam.html'">Back</button>
+
+    <!-- Popup -->
+    <div id="popup" class="popup">
+        <img id="popupImage" src="" alt="Selected Image">
+        <div class="button-container">
+            <p>What do you want to do?</p>
+            <button id="deleteBtn">Delete</button>
+            <button id="downloadBtn">Download</button>
+            <button onclick="closePopup()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        const albumContainer = document.getElementById('album');
+        const popup = document.getElementById('popup');
+        const popupImage = document.getElementById('popupImage');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        let images = JSON.parse(localStorage.getItem('savedImages')) || [];
+        let selectedImageIndex = null;
+
+        function renderAlbum() {
+            albumContainer.innerHTML = '';
+            images.forEach((src, index) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.classList.add('photo-strip');
+                img.addEventListener('click', () => openPopup(index));
+                albumContainer.appendChild(img);
+            });
+        }
+
+        function openPopup(index) {
+            selectedImageIndex = index;
+            popupImage.src = images[index]; // Set the large image in the popup
+            popup.style.display = 'flex';
+        }
+
+        function closePopup() {
+            popup.style.display = 'none';
+        }
+
+        deleteBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this photo?')) {
+                images.splice(selectedImageIndex, 1);
+                localStorage.setItem('savedImages', JSON.stringify(images));
+                renderAlbum();
+                closePopup();
+            }
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = images[selectedImageIndex];
+            link.download = 'photo.png';
+            link.click();
+            closePopup();
+        });
+
+        renderAlbum();
+    </script>
+</body>
+</html>
